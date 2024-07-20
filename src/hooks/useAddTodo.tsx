@@ -3,6 +3,7 @@ import { useRef } from "react";
 import { Todo } from "../hooks/useTodos";
 import axios from "axios";
 import { CACHE_KEY_TODOS } from "../constant";
+import todoService from "../services/todoService";
 
 interface AddTodoContext {
   previousTodos: Todo[];
@@ -12,11 +13,7 @@ const useAddTodo = (onAdd: () => void) => {
   const queryClient = useQueryClient();
 
   return useMutation<Todo, Error, Todo, AddTodoContext>({
-    mutationFn: (todo: Todo) =>
-      axios
-        .post<Todo[]>("https://jsonplaceholder.typicode.com/todos", todo)
-        .then((res) => res.data),
-
+    mutationFn: todoService.post,
     onMutate: (newTodo: Todo) => {
       queryClient.cancelQueries(CACHE_KEY_TODOS);
       const previousTodos = queryClient.getQueryData<Todo[]>(
@@ -26,6 +23,8 @@ const useAddTodo = (onAdd: () => void) => {
         newTodo,
         ...old,
       ]);
+      onAdd();
+
       return { previousTodos };
     },
 
@@ -38,8 +37,6 @@ const useAddTodo = (onAdd: () => void) => {
       queryClient.setQueryData<Todo[]>(CACHE_KEY_TODOS, (todos) =>
         todos?.map((todo) => (todo.id === saveTodo.id ? saveTodo : todo))
       );
-
-      onAdd();
     },
 
     onError: (_error: Error, _newTodo: Todo, context: AddTodoContext) => {
