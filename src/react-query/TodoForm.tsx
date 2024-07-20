@@ -7,7 +7,7 @@ const TodoForm = () => {
   const queryClient = useQueryClient();
   const ref = useRef<HTMLInputElement>(null);
 
-  const addMutate = useMutation({
+  const addMutate = useMutation<Todo, Error, Todo>({
     mutationFn: (todo: Todo) =>
       axios
         .post<Todo[]>("https://jsonplaceholder.typicode.com/todos", todo)
@@ -25,27 +25,32 @@ const TodoForm = () => {
     },
   });
   return (
-    <form
-      className="row mb-3"
-      onSubmit={(event) => {
-        event.preventDefault();
-        if (ref.current && ref.current.value) {
-          addMutate.mutate({
-            id: 0,
-            title: ref.current.value,
-            userId: 1,
-            completed: false,
-          });
-        }
-      }}
-    >
-      <div className="col">
-        <input ref={ref} type="text" className="form-control" />
-      </div>
-      <div className="col">
-        <button className="btn btn-primary">Add</button>
-      </div>
-    </form>
+    <>
+      {addMutate.error && (
+        <div className="alert alert-danger"> {addMutate.error.message}</div>
+      )}
+      <form
+        className="row mb-3"
+        onSubmit={(event) => {
+          event.preventDefault();
+          if (ref.current && ref.current.value) {
+            addMutate.mutate({
+              id: 0,
+              title: ref.current.value,
+              userId: 1,
+              completed: false,
+            });
+          }
+        }}
+      >
+        <div className="col">
+          <input ref={ref} type="text" className="form-control" />
+        </div>
+        <div className="col">
+          <button className="btn btn-primary">Add</button>
+        </div>
+      </form>
+    </>
   );
 };
 
