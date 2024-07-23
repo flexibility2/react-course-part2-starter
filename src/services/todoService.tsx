@@ -7,4 +7,4 @@ export interface Todo {
   completed: boolean;
 }
 
-export default new ApiClient<Todo>("/todos");
+export default new ApiClient<Todo[]>("/todos");
